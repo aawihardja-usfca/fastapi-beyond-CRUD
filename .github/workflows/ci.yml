@@ -29,8 +29,12 @@ jobs:
           # url format: smtp+starttls://user:password@server:port
           # "Service",  "Name",       "Username",                  "Password",          "Hostname",           "Port", "Security"
           # "SMTP",     "Maynard Fay","maynard.fay@ethereal.email","HHvj9VW59c5Z1hGxGU","smtp.ethereal.email",587,    "STARTTLS"
-          connection_url: smtp+starttls://maynard.fay@ethereal.email:HHvj9VW59c5Z1hGxGU@smtp.ethereal.email:587
+          # connection_url: smtp+starttls://maynard.fay@ethereal.email:HHvj9VW59c5Z1hGxGU@smtp.ethereal.email:587
+          server_address: smtp.ethereal.email
+          server_port: 587
+          username: maynard.fay@ethereal.email
+          password: HHvj9VW59c5Z1hGxGU
           subject: "Pull Request Closed - Invalid Commit Message"
-          to: andrewadi96@gmail.com
+          to: email@example.com
           from: "GitHub Actions <no-reply@example.com>"
           body: "Your PR #${{ github.event.pull_request.number }} was closed due to non-compliant commit messages."
