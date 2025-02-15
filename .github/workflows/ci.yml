@@ -5,7 +5,8 @@ on:
     branches: "main"
 
 jobs:
-  commit-check:
+  # Check conventional commit on PR
+  commitlint:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -15,15 +16,22 @@ jobs:
       - uses: actions/checkout@v4
       - uses: wagoid/commitlint-github-action@v6
 
+  # If commitlint fails
+  handle-commitlint-failure:
+    needs: commitlint
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
       - name: Close PR due to invalid commit message
-        if: failure()
         uses: peter-evans/close-pull@v3
         with:
           pull-request-number: ${{ github.event.pull_request.number }}
           comment: "This PR has been closed because the commit messages do not follow the Conventional Commits standard. Please update your commit messages and try again."
 
       - name: Send Email Notification (Ethereal)
-        if: failure()
         uses: dawidd6/action-send-mail@v4
         with:
           # url format: smtp+starttls://user:password@server:port
