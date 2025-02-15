@@ -1,0 +1,36 @@
+name: Verify Conventional Commits
+
+on:
+  pull_request:
+    branches: "main"
+
+jobs:
+  commit-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: wagoid/commitlint-github-action@v6
+
+      - name: Close PR due to invalid commit message
+        if: failure()
+        uses: peter-evans/close-pull@v3
+        with:
+          pull-request-number: ${{ github.event.pull_request.number }}
+          comment: "This PR has been closed because the commit messages do not follow the Conventional Commits standard. Please update your commit messages and try again."
+
+      - name: Send Email Notification (Ethereal)
+        if: failure()
+        uses: dawidd6/action-send-mail@v4
+        with:
+          # url format: smtp+starttls://user:password@server:port
+          # "Service",  "Name",       "Username",                  "Password",          "Hostname",           "Port", "Security"
+          # "SMTP",     "Maynard Fay","maynard.fay@ethereal.email","HHvj9VW59c5Z1hGxGU","smtp.ethereal.email",587,    "STARTTLS"
+          connection_url: smtp+starttls://maynard.fay@ethereal.email:HHvj9VW59c5Z1hGxGU@smtp.ethereal.email:587
+          subject: "Pull Request Closed - Invalid Commit Message"
+          to: andrewadi96@gmail.com
+          from: "GitHub Actions <no-reply@example.com>"
+          body: "Your PR #${{ github.event.pull_request.number }} was closed due to non-compliant commit messages."
