@@ -2,7 +2,7 @@ name: Nightly Build
 
 on:
   schedule:
-    - cron: "20 16 * * *"
+    - cron: "8 10 * * *"
   workflow_dispatch: # to enable manual trigger
 
 permissions:
@@ -22,12 +22,6 @@ jobs:
       - name: Start the app
         run: docker compose up -d --build
 
-      - name: Debug - Check Running Containers
-        run: docker ps -a
-
-      - name: Debug - Print Web Container Logs
-        run: docker compose logs web
-
       - name: Run Database Migrations
         run: docker compose exec web alembic upgrade head
 
@@ -35,15 +29,20 @@ jobs:
         run: docker compose exec web pytest
         continue-on-error: false
 
-      # - name: Login to Docker Hub
-      #   if: success()  # Only run if tests pass
-      #   run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      - name: Login to Docker Hub
+        if: success()
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # - name: Push Image to Docker Hub
-      #   if: success()  # Only run if tests pass
-      #   run: |
-      #     docker tag fastapi-beyond-crud:latest my-dockerhub-username/fastapi-beyond-crud:latest
-      #     docker push my-dockerhub-username/fastapi-beyond-crud:latest
+      - name: Push Image to Docker Hub
+        if: success()
+        run: |
+          docker tag fastapi-beyond-crud-web:latest ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-beyond-crud-web:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-beyond-crud-web:latest
+          docker tag fastapi-beyond-crud-celery:latest ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-beyond-crud-celery:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-beyond-crud-celery:latest
 
   handle-build-failure:
     needs: build-test-and-push
