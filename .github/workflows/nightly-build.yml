@@ -1,0 +1,63 @@
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: "20 16 * * *"
+  workflow_dispatch: # to enable manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: cp .env.example .env
+
+      - name: Start the app
+        run: docker compose up -d --build
+
+      - name: Debug - Check Running Containers
+        run: docker ps -a
+
+      - name: Debug - Print Web Container Logs
+        run: docker compose logs web
+
+      - name: Run Database Migrations
+        run: docker compose exec web alembic upgrade head
+
+      - name: Run Tests
+        run: docker compose exec web pytest
+        continue-on-error: false
+
+      # - name: Login to Docker Hub
+      #   if: success()  # Only run if tests pass
+      #   run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      # - name: Push Image to Docker Hub
+      #   if: success()  # Only run if tests pass
+      #   run: |
+      #     docker tag fastapi-beyond-crud:latest my-dockerhub-username/fastapi-beyond-crud:latest
+      #     docker push my-dockerhub-username/fastapi-beyond-crud:latest
+
+  handle-build-failure:
+    needs: build-test-and-push
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Failure Email Notification (Ethereal)
+        uses: dawidd6/action-send-mail@v4
+        with:
+          server_address: smtp.ethereal.email
+          server_port: 587
+          username: maynard.fay@ethereal.email
+          password: HHvj9VW59c5Z1hGxGU
+          subject: "Nightly Build Failed!"
+          to: email@example.com
+          from: "GitHub Actions <no-reply@example.com>"
+          body: "The nightly build for the main branch has failed."
