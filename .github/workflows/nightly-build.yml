@@ -2,7 +2,7 @@ name: Nightly Build
 
 on:
   schedule:
-    - cron: "8 10 * * *"
+    - cron: "0 8 * * *"
   workflow_dispatch: # to enable manual trigger
 
 permissions:
