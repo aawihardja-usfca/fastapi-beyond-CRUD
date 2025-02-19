@@ -1,3 +1,14 @@
+# CI Workflow
+### Commitlint
+When creating a PR, a workflow will trigger to verify that commit message complies with the [conventional commit format](https://www.conventionalcommits.org/en/v1.0.0/#summary). If it doesn't comply, the PR is closed and the user is notified.
+
+### Nightly Build
+The nightly build workflow is set up to run everyday at 12am PST. It performs the following actions:
+1. Run test cases
+2. If it passes all test cases, the container image is pushed to DockerHub. The user is notified if it fails
+
+___
+
 # FastAPI Beyond CRUD 
 
 This is the source code for the [FastAPI Beyond CRUD](https://youtube.com/playlist?list=PLEt8Tae2spYnHy378vMlPH--87cfeh33P&si=rl-08ktaRjcm2aIQ) course. The course focuses on FastAPI development concepts that go beyond the basic CRUD operations.
