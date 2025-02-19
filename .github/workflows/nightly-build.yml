@@ -26,7 +26,8 @@ jobs:
         run: docker compose exec web alembic upgrade head
 
       - name: Run Tests
-        run: docker compose exec web pytest
+        # run: docker compose exec web pytest
+        run: exit 1
         continue-on-error: false
 
       - name: Login to Docker Hub
